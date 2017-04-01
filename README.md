@@ -7,6 +7,21 @@
   restfulApi part use a lot of structures in github.com/BitMEX/api-connectors.git  
 
 
+## Installation
+  go get github.com/jxc6698/bitcoin-exchange-api
+
+
+## Usage
+  You can look at test/bitmex_test.go
+
+
+## Testing
+  add your apikey and secretkey in bitmex_test.go
+
+```
+  go test test/bitmex_test.go
+```
+
 ***
 ## LICENCE
 MIT LICENCE
