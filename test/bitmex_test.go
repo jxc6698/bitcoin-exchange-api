@@ -16,14 +16,89 @@ import (
 	"github.com/jxc6698/bitcoin-exchange-api/bitmex"
 	"github.com/jxc6698/bitcoin-exchange-api/utils"
 	"time"
+	"os"
 )
 
 
 var (
-	apikey string = "api-key"
-	apisecret string = "api-secret"
+	apikey = "apikey"
+	apisecret = "apisecret"
 )
 
+func init() {
+	apikey = os.Getenv("BITMEX_API_KEY")
+	apisecret = os.Getenv("BITMEX_API_SECRET")
+}
+
+func subscribeContractsOrder(chOrder chan bmwebsocket.WSOrder) {
+	var reset int64 = 1
+	ch := make(chan int64)
+
+	for {
+		if reset == 1 {
+			ws := bmwebsocket.NewWS()
+			ws.RegisterReStart(ch)
+
+			err := ws.Connect()
+			if err != nil {
+				fmt.Println("error: " + err.Error())
+			}
+			chAuth := ws.Auth(apikey, apisecret)
+			fmt.Println(<-chAuth)
+
+			ws.SubOrder(chOrder, []bitmex.Contracts{bitmex.XBTUSD,
+				bitmex.XBTH17})
+			reset = 0
+		}
+		break;
+
+		select {
+		case  reset = <-ch:
+			if 0 == reset {
+				fmt.Println("ws will stopped")
+				break
+			}
+		case <-time.After(time.Hour):
+		}
+	}
+}
+
+func Test_websocket_order(t *testing.T) {
+	var order bmwebsocket.WSOrder
+	chOrder := make(chan bmwebsocket.WSOrder, 100)
+
+	subscribeContractsOrder(chOrder)
+	for i:=0;i<3;i++ {
+		order = <-chOrder
+		t.Log(order)
+	}
+}
+
+
+/**
+ *  subscribe wallet will only receive one message
+ */
+func subscribeWallet(chWallet chan bitmex.WSWallet) bitmex.WSWallet {
+	ws := bmwebsocket.NewWS()
+	err := ws.Connect()
+	if err != nil {
+		fmt.Println("error: " + err.Error())
+	}
+	chAuth := ws.Auth(apikey, apisecret)
+
+	fmt.Println(<-chAuth)
+
+	_ = ws.SubWallet(chWallet)
+	wallet := <- chWallet
+	return wallet
+}
+
+func Test_websocket_wallet(t *testing.T) {
+	chWallet := make(chan bitmex.WSWallet)
+	wallet := subscribeWallet(chWallet)
+
+	t.Log(wallet)
+}
 
 
 func subscribeContractsQuotes(chQuote chan bmwebsocket.WSQuote) {
@@ -41,7 +116,7 @@ func subscribeContractsQuotes(chQuote chan bmwebsocket.WSQuote) {
 			}
 
 			ws.SubQuote(chQuote, []bitmex.Contracts{bitmex.XBTUSD,
-				bitmex.XBTH17})
+				bitmex.XBTM17})
 			reset = 0
 		}
 		break;

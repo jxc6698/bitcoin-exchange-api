@@ -19,6 +19,8 @@
   add your apikey and secretkey in bitmex_test.go
 
 ```
+  export BITMEX_API_KEY="api-key"
+  export BITMEX_API_SECRET="api-secret"
   go test test/bitmex_test.go
 ```
 

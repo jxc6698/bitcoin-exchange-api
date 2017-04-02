@@ -26,6 +26,13 @@ import (
 	"time"
 )
 
+const (
+	// order status
+	ORDER_EMPTY  = ""
+	ORDER_NEW    = "New"
+	ORDER_FILLED = "Filled"
+)
+
 type Order struct {
 
 	OrderID string `json:"orderID,omitempty"`
