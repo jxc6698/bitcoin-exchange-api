@@ -703,82 +703,82 @@ func (a OrderApi) OrderNew(symbol string, side string, simpleOrderQty float64, q
 	return successPayload, NewAPIResponse(httpResponse.RawResponse), err
 }
 
-///**
-// * Create multiple new orders.
-// * This endpoint is used for placing bulk orders. Valid order types are Market, Limit, Stop, StopLimit,
-// * MarketIfTouched, LimitIfTouched, MarketWithLeftOverAsLimit, and Pegged.  Each individual order object
-// * in the array should have the same properties as an individual POST /order call.  This endpoint is much
-// * faster for getting many orders into the book at once. Because it reduces load on BitMEX systems, this
-// * endpoint is ratelimited at &#x60;ceil(0.5 * orders)&#x60;. Submitting 10 orders via a bulk order call
-// * will only count as 5 requests.  For now, only &#x60;application/json&#x60; is supported on this endpoint.
-// *
-// * @param orders An array of orders.
-// * @return []Order
-// * TODO:  currently not used, input parameter should be order array
-// */
-//func (a OrderApi) OrderNewBulk(orders string) ([]Order, *APIResponse, error) {
-//
-//	var httpMethod = "Post"
-//	// create path and map variables
-//	urlstr := a.Configuration.Host + a.Configuration.BasePath + "/order/bulk"
-//	path := a.Configuration.BasePath + "/order/bulk"
-//
-//
-//	headerParams := make(map[string]string)
-//	queryParams := url.Values{}
-//	formParams := make(map[string]interface{})
-//	var postBody interface{}
-//	var fileName string
-//	var fileBytes []byte
-//
-//	// add default headers if any
-//	for key := range a.Configuration.DefaultHeader {
-//		headerParams[key] = a.Configuration.DefaultHeader[key]
-//	}
-//
-//
-//	// to determine the Content-Type header
-//	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
-//
-//	// set Content-Type header
-//	localVarHttpContentType := a.Configuration.APIClient.SelectHeaderContentType(localVarHttpContentTypes)
-//	if localVarHttpContentType != "" {
-//		headerParams["Content-Type"] = localVarHttpContentType
-//	}
-//	// to determine the Accept header
-//	localVarHttpHeaderAccepts := []string{
-//		"application/json",
-//"application/xml",
-//"text/xml",
-//"application/javascript",
-//"text/javascript",
-//	}
-//
-//	// set Accept header
-//	localVarHttpHeaderAccept := a.Configuration.APIClient.SelectHeaderAccept(localVarHttpHeaderAccepts)
-//	if localVarHttpHeaderAccept != "" {
-//		headerParams["Accept"] = localVarHttpHeaderAccept
-//	}
-//
-//	formParams["orders"] = orders
-//
-//	var expires = strconv.FormatInt(time.Now().Unix() + a.Configuration.ExpireTime, 10)
-//	bodybytes, _ := json.Marshal(formParams)
-//	bodystr := string(bodybytes)
-//
-//	headerParams["api-expires"] = expires
-//	headerParams["api-key"] = a.Configuration.Account.Apikey
-//	headerParams["api-signature"] = Signature(a.Configuration.Account.Secretkey,
-//		strings.ToUpper(httpMethod), path, "", expires, bodystr)
-//
-//	var successPayload = new([]Order)
-//	httpResponse, err := a.Configuration.APIClient.CallAPI(path, httpMethod, postBody, headerParams, queryParams, formParams, fileName, fileBytes)
-//	if err != nil {
-//		return *successPayload, NewAPIResponse(httpResponse.RawResponse), err
-//	}
-//	err = json.Unmarshal(httpResponse.Body(), &successPayload)
-//	return *successPayload, NewAPIResponse(httpResponse.RawResponse), err
-//}
+/**
+ * Create multiple new orders.
+ * This endpoint is used for placing bulk orders. Valid order types are Market, Limit, Stop, StopLimit,
+ * MarketIfTouched, LimitIfTouched, MarketWithLeftOverAsLimit, and Pegged.  Each individual order object
+ * in the array should have the same properties as an individual POST /order call.  This endpoint is much
+ * faster for getting many orders into the book at once. Because it reduces load on BitMEX systems, this
+ * endpoint is ratelimited at &#x60;ceil(0.5 * orders)&#x60;. Submitting 10 orders via a bulk order call
+ * will only count as 5 requests.  For now, only &#x60;application/json&#x60; is supported on this endpoint.
+ *
+ * @param orders An array of orders.
+ * @return []Order
+ * TODO:  currently not used, input parameter should be order array
+ */
+func (a OrderApi) OrderNewBulk(orders []bitmex.Order) ([]bitmex.Order, *APIResponse, error) {
+
+	var httpMethod = "Post"
+	// create path and map variables
+	urlstr := a.Configuration.Host + a.Configuration.BasePath + "/order/bulk"
+	path := a.Configuration.BasePath + "/order/bulk"
+
+
+	headerParams := make(map[string]string)
+	queryParams := url.Values{}
+	formParams := make(map[string]interface{})
+	var postBody interface{}
+	var fileName string
+	var fileBytes []byte
+
+	// add default headers if any
+	for key := range a.Configuration.DefaultHeader {
+		headerParams[key] = a.Configuration.DefaultHeader[key]
+	}
+
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+
+	// set Content-Type header
+	localVarHttpContentType := a.Configuration.APIClient.SelectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		headerParams["Content-Type"] = localVarHttpContentType
+	}
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+"application/xml",
+"text/xml",
+"application/javascript",
+"text/javascript",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := a.Configuration.APIClient.SelectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		headerParams["Accept"] = localVarHttpHeaderAccept
+	}
+
+	formParams["orders"] = orders
+
+	SetBItmexAPIheader(headerParams, &a, httpMethod, path, formParams, queryParams)
+
+	var successPayload = make([]bitmex.Order, 0)
+	httpResponse, err := a.Configuration.APIClient.CallAPI(urlstr, httpMethod, postBody, headerParams, queryParams, formParams, fileName, fileBytes)
+	if err != nil {
+		return successPayload, NewAPIResponse(httpResponse.RawResponse), err
+	}
+
+	bodybytes := httpResponse.Body()
+	errormsg := bitmex.ErrorMessage{}
+	json.Unmarshal(bodybytes, &errormsg)
+	if errormsg.Errormsg.Message != "" {
+		return successPayload, NewAPIResponse(httpResponse.RawResponse), errors.New(errormsg.Errormsg.Message)
+	}
+	err = json.Unmarshal(bodybytes, &successPayload)
+	return successPayload, NewAPIResponse(httpResponse.RawResponse), err
+}
 
 
 
@@ -794,6 +794,64 @@ func SetBItmexAPIheader(headerParams map[string]string, a *OrderApi, httpMethod,
 	headerParams["api-key"] = a.Configuration.Account.Apikey
 	headerParams["api-signature"] = Signature(a.Configuration.Account.Secretkey,
 		httpMethod, path, "", expires, bodystr)
+}
+
+
+/** create an order structure */
+func (a OrderApi) NewOrder(symbol string, side string, simpleOrderQty float64, quantity float32, orderQty float32, price float64, displayQty float32, stopPrice float64, stopPx float64, clOrdID string, clOrdLinkID string, pegOffsetValue float64, pegPriceType string, type_ string, ordType string, timeInForce string, execInst string, contingencyType string, text string) (*bitmex.Order) {
+	order := new(bitmex.Order)
+	// set essential field
+	order.Symbol = symbol
+	order.Side = side
+	order.OrdType = ordType
+
+	// ignore setting deprecated field
+	//formParams["quantity"] = utils.Float32ToString(quantity, 4)
+	//formParams["stopPrice"] = utils.Float64ToString(stopPrice, 4)
+	//formParams["type_"] = type_
+
+	// check and set optional field
+	if clOrdID != "" {
+		order.ClOrdID = clOrdID
+	}
+	if simpleOrderQty != 0 {
+		order.SimpleOrderQty = simpleOrderQty
+	}
+	if orderQty != 0 {
+		order.OrderQty = orderQty
+	}
+	if price != 0 {
+		order.Price = price
+	}
+	if 0 != displayQty {
+		order.DisplayQty = displayQty
+	}
+	if 0 != stopPx {
+		order.StopPx = stopPx
+	}
+	if "" != clOrdLinkID {
+		order.ClOrdLinkID = clOrdLinkID
+	}
+	if 0 != pegOffsetValue {
+		order.PegOffsetValue = pegOffsetValue
+	}
+	if "" != pegPriceType {
+		order.PegPriceType = pegPriceType
+	}
+	if "" != timeInForce {
+		order.TimeInForce = timeInForce
+	}
+	if "" != execInst {
+		order.ExecInst = execInst
+	}
+	if "" != contingencyType {
+		order.ContingencyType = contingencyType
+	}
+	if "" != text {
+		order.Text = text
+	}
+
+	return order
 }
 
 /**

@@ -16,12 +16,19 @@
 
 
 ## Testing
-  add your apikey and secretkey in bitmex_test.go
-
+  add your apikey and secretkey in path
 ```
   export BITMEX_API_KEY="api-key"
   export BITMEX_API_SECRET="api-secret"
+```
+#### run all testcases
+
+```
   go test test/bitmex_test.go
+```
+##### run a specific testcase
+```
+  go test --run Test_restfulapi_bulk test/bitmex_test.go
 ```
 
 ***

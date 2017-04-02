@@ -47,7 +47,7 @@ func subscribeContractsOrder(chOrder chan bmwebsocket.WSOrder) {
 			fmt.Println(<-chAuth)
 
 			ws.SubOrder(chOrder, []bitmex.Contracts{bitmex.XBTUSD,
-				bitmex.XBTH17})
+				bitmex.XBTM17})
 			reset = 0
 		}
 		break;
@@ -179,7 +179,7 @@ func subscribeTrade(cont1, cont2 bitmex.Contracts, chTrade chan bmwebsocket.WSTr
 func Test_websocket_trade(t *testing.T) {
 
 	chTrade := make(chan bmwebsocket.WSTrade, 100)
-	subscribeTrade(bitmex.XBTH17, bitmex.XBTUSD, chTrade)
+	subscribeTrade(bitmex.XBTM17, bitmex.XBTUSD, chTrade)
 
 	var trade bmwebsocket.WSTrade
 	for i:=0; i<3 ;i++{
@@ -230,7 +230,7 @@ func CancelOrder(orderID string, clOrdID string, text string) (*bitmex.Order, *b
 }
 
 
-func Test_restfulapi(t *testing.T) {
+func Test_restfulapi_buysell(t *testing.T) {
 	var err error
 	configuration = bitmex.NewConfiguration( bmrestfulapi.APIClientImpl{})
 	orderapi = bmrestfulapi.NewOrderApi(configuration)
@@ -249,12 +249,40 @@ func Test_restfulapi(t *testing.T) {
 	assert.True(t, err == nil, err.Error())
 	_, _, err = SendLimitOrderSell(orderapi, 1, 100000,
 		string(bitmex.XBTUSD))
-	assert.True(t, err != nil, err.Error())
+	assert.True(t, err == nil, err.Error())
 	_, _, err = SendMarketOrderBuy(orderapi, 1, 0,
 		string(bitmex.XBTUSD))
-	assert.True(t, err != nil, err.Error())
+	assert.True(t, err == nil, err.Error())
 	_, _, err = SendLimitOrderBuy(orderapi, 1, 0,
 		string(bitmex.XBTUSD))
-	assert.True(t, err != nil, err.Error())
+	assert.True(t, err == nil, err.Error())
+}
+
+
+func Test_restfulapi_bulk(t *testing.T) {
+	configuration = bitmex.NewConfiguration( bmrestfulapi.APIClientImpl{})
+	orderapi = bmrestfulapi.NewOrderApi(configuration)
+
+	account.Apikey = apikey
+	account.Secretkey = apisecret
+	//orderapi.Configuration.
+	orderapi.Configuration.Host = "https://www.bitmex.com"
+	orderapi.Configuration.BasePath = "/api/v1"
+	orderapi.Configuration.Account = &account
+	orderapi.Configuration.ExpireTime = 5
+
+	order1 := orderapi.NewOrder(string(bitmex.XBTUSD), bitmex.BUY, 0.0, 0.0, float32(1), 10, 0.0, 0.0, 0.0,
+		"", "", 0.0, "", "", bitmex.LIMIT, "", "", "", "")
+	order2 := orderapi.NewOrder(string(bitmex.XBTUSD), bitmex.SELL, 0.0, 0.0, float32(1), 11110, 0.0, 0.0, 0.0,
+		"", "", 0.0, "", "", bitmex.LIMIT, "", "", "", "")
+	orders := make([]bitmex.Order, 0)
+	orders = append(orders, *order1)
+	orders = append(orders, *order2)
+
+	ords,_,err := orderapi.OrderNewBulk(orders)
+	assert.True(t, err == nil)
+	t.Log(orders)
+	t.Log("\n")
+	t.Log(ords)
 }
 
