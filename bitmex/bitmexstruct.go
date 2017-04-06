@@ -1,6 +1,9 @@
 package bitmex
 
-import "time"
+import (
+	"time"
+	"github.com/santacruz123/bitmex-go"
+)
 
 const (
 	BUY     = "Buy"
@@ -68,3 +71,6 @@ type WSWallet struct {
 	WithdrawalLock []interface{} `json:"withdrawalLock,omitempty"`
 }
 
+type AbstructAPI struct {
+	Configuration *Configuration
+}

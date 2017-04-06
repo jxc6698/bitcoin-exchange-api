@@ -38,6 +38,7 @@ import (
 )
 
 type OrderApi struct {
+	bitmex
 	Configuration *bitmex.Configuration
 }
 

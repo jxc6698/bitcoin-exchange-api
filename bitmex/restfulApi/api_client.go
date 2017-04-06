@@ -101,7 +101,7 @@ func (c APIClientImpl) CallAPI(path string, method string,
 	return nil, fmt.Errorf("invalid method %v", method)
 }
 
-func (c *APIClientImpl) ParameterToString(obj interface{},collectionFormat string) string {
+func (c APIClientImpl) ParameterToString(obj interface{},collectionFormat string) string {
 	if reflect.TypeOf(obj).String() == "[]string" {
 		switch	collectionFormat {
 		case "pipes":

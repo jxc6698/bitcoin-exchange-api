@@ -45,6 +45,8 @@ type APIClient interface {
 	SelectHeaderContentType(contentTypes []string) string
 
 	SelectHeaderAccept(accepts []string) string
+
+	ParameterToString(obj interface{},collectionFormat string) string
 }
 
 
