@@ -173,6 +173,9 @@ func (ws *WS) read() {
 				log.Info("restart")
 				if len(ws.chStart) == 0 {
 					ws.chStart <- 1
+
+					ws.Disconnect()
+					return
 				}
 			}
 		}
