@@ -2,7 +2,6 @@ package bitmex
 
 import (
 	"time"
-	"github.com/santacruz123/bitmex-go"
 )
 
 const (

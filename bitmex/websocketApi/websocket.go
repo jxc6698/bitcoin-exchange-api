@@ -15,6 +15,12 @@ import (
 
 const wsURL = "wss://www.bitmex.com/realtime"
 
+const (
+	IDLE  = 0
+	RESET = 1
+	EXIT  = 2
+)
+
 //WS - websocket connection object
 type WS struct {
 	sync.Mutex
@@ -72,7 +78,14 @@ func (ws *WS) Disconnect() error {
 func (ws *WS) read() {
 	for {
 		var msg string
-		websocket.Message.Receive(ws.conn, &msg)
+		err := websocket.Message.Receive(ws.conn, &msg)
+		if nil != err {
+			log.Info("Recive error: ")
+			log.Info(err.Error())
+
+			ws.chStart <- RESET
+			return
+		}
 
 		log.Debugf("Raw: %v", msg)
 
@@ -172,9 +185,7 @@ func (ws *WS) read() {
 			} else {
 				log.Info("restart")
 				if len(ws.chStart) == 0 {
-					ws.chStart <- 1
-
-					ws.Disconnect()
+					ws.chStart <- RESET
 					return
 				}
 			}
